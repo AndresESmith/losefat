@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FormUp — Teen Fitness</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --green: #B8F53A;
+    --green-dim: #8AC42A;
+    --dark: #0E0F0E;
+    --dark2: #161917;
+    --dark3: #1E2220;
+    --dark4: #252B27;
+    --card: #1A1E1C;
+    --border: rgba(255,255,255,0.08);
+    --text: #F0F2EE;
+    --muted: #7A8A7E;
+    --soft: #A8B8AC;
+    --red: #FF5252;
+    --amber: #FFB830;
+    --blue: #4DAAFF;
+    --nav-h: 68px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100dvh;
+    padding-bottom: var(--nav-h);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* TYPOGRAPHY */
+  .display { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: -0.01em; }
+  .label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+
+  /* PAGES */
+  .page { display: none; min-height: calc(100dvh - var(--nav-h)); }
+  .page.active { display: block; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h);
+    background: var(--dark2);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: stretch;
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .nav-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; border: none; background: none; cursor: pointer;
+    color: var(--muted); font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500;
+    letter-spacing: 0.04em; transition: color 0.2s;
+    padding-bottom: 4px;
+  }
+  .nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .nav-btn.active { color: var(--green); }
+  .nav-indicator {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px; background: var(--green);
+    border-radius: 0 0 2px 2px;
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1), left 0.3s;
+  }
+
+  /* HOME PAGE */
+  .hero {
+    background: var(--dark2);
+    padding: 48px 20px 36px;
+    position: relative; overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 80% 20%, rgba(184,245,58,0.08) 0%, transparent 70%);
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(184,245,58,0.12); border: 1px solid rgba(184,245,58,0.25);
+    border-radius: 100px; padding: 4px 12px;
+    font-size: 11px; font-weight: 600; color: var(--green); letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 16px;
+  }
+  .hero-eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+  .hero h1 { font-size: clamp(52px, 14vw, 80px); line-height: 0.92; color: var(--text); margin-bottom: 16px; }
+  .hero h1 span { color: var(--green); }
+  .hero-sub { font-size: 15px; color: var(--soft); line-height: 1.6; max-width: 320px; margin-bottom: 28px; }
+  .hero-stats {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 32px;
+  }
+  .hero-stat {
+    background: var(--dark3); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 12px; text-align: center;
+  }
+  .hero-stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 800; color: var(--green); line-height: 1; }
+  .hero-stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .section { padding: 28px 20px; }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; }
+  .section-head h2 { font-size: 20px; font-weight: 600; }
+  .section-head a { font-size: 13px; color: var(--green); text-decoration: none; }
+
+  /* QUICK CARDS */
+  .quick-cards { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .quick-cards::-webkit-scrollbar { display: none; }
+  .q-card {
+    flex: 0 0 160px; border-radius: 14px; padding: 18px 16px;
+    position: relative; overflow: hidden; cursor: pointer; min-height: 120px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    border: 1px solid transparent;
+  }
+  .q-card-upper .q-card { flex: 0 0 200px; min-height: 140px; }
+  .q-card-green { background: var(--green); }
+  .q-card-dark { background: var(--dark3); border-color: var(--border); }
+  .q-card-blue { background: rgba(77,170,255,0.12); border-color: rgba(77,170,255,0.2); }
+  .q-card-amber { background: rgba(255,184,48,0.12); border-color: rgba(255,184,48,0.2); }
+  .q-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 8px; }
+  .q-card-green .q-icon { background: rgba(0,0,0,0.15); }
+  .q-card-dark .q-icon { background: var(--dark4); }
+  .q-card-blue .q-icon { background: rgba(77,170,255,0.15); }
+  .q-card-amber .q-icon { background: rgba(255,184,48,0.15); }
+  .q-title { font-size: 15px; font-weight: 600; line-height: 1.3; }
+  .q-card-green .q-title { color: #0E0F0E; }
+  .q-sub { font-size: 12px; margin-top: 4px; }
+  .q-card-green .q-sub { color: rgba(0,0,0,0.6); }
+  .q-sub:not(.q-card-green .q-sub) { color: var(--muted); }
+  .q-arrow { font-size: 18px; align-self: flex-end; }
+  .q-card-green .q-arrow { color: rgba(0,0,0,0.4); }
+  .q-arrow:not(.q-card-green .q-arrow) { color: var(--muted); }
+
+  /* PROGRESS RING */
+  .week-progress { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin: 0 20px 24px; }
+  .week-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .week-head h3 { font-size: 16px; font-weight: 600; }
+  .week-head span { font-size: 13px; color: var(--muted); }
+  .days-row { display: flex; gap: 8px; }
+  .day-dot { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .day-dot-circle {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; transition: all 0.2s;
+  }
+  .day-dot-circle.done { background: var(--green); border-color: var(--green); color: #0E0F0E; }
+  .day-dot-circle.today { border-color: var(--green); color: var(--green); }
+  .day-dot-circle.rest { background: var(--dark3); border-color: transparent; color: var(--muted); }
+  .day-dot-label { font-size: 10px; color: var(--muted); font-weight: 500; }
+
+  /* WORKOUT PAGE */
+  .page-header { padding: 40px 20px 20px; background: var(--dark2); }
+  .page-header h1 { font-size: clamp(36px, 10vw, 56px); line-height: 0.95; color: var(--text); }
+  .page-header p { font-size: 14px; color: var(--muted); margin-top: 8px; }
+
+  .schedule { padding: 20px 20px 0; }
+  .day-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    margin-bottom: 12px; overflow: hidden;
+  }
+  .day-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 18px; cursor: pointer;
+  }
+  .day-card-left { display: flex; align-items: center; gap: 12px; }
+  .day-badge {
+    width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.03em; flex-shrink: 0;
+  }
+  .badge-lift { background: rgba(184,245,58,0.15); color: var(--green); }
+  .badge-cardio { background: rgba(77,170,255,0.15); color: var(--blue); }
+  .badge-rest { background: var(--dark3); color: var(--muted); }
+  .day-card-title { font-size: 15px; font-weight: 600; }
+  .day-card-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .chevron { font-size: 18px; color: var(--muted); transition: transform 0.25s; }
+  .day-card.open .chevron { transform: rotate(180deg); }
+  .day-card-body { display: none; padding: 0 18px 18px; }
+  .day-card.open .day-card-body { display: block; }
+  .exercise-list { border-top: 1px solid var(--border); padding-top: 14px; }
+  .ex-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .ex-row:last-child { border-bottom: none; }
+  .ex-name { font-size: 14px; color: var(--text); }
+  .ex-sets { font-size: 13px; color: var(--green); font-weight: 600; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; }
+  .tip-box { background: rgba(184,245,58,0.06); border: 1px solid rgba(184,245,58,0.15); border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 13px; color: var(--soft); line-height: 1.5; }
+  .tip-box strong { color: var(--green); }
+
+  /* NUTRITION PAGE */
+  .macro-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin: 0 20px 16px; }
+  .macro-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .calorie-display { text-align: center; padding: 24px 0 8px; }
+  .calorie-num { font-family: 'Barlow Condensed', sans-serif; font-size: 72px; font-weight: 900; color: var(--green); line-height: 1; }
+  .calorie-unit { font-size: 14px; color: var(--muted); margin-top: 4px; }
+  .calorie-note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+  .macro-bars { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+  .macro-row { }
+  .macro-row-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .macro-name { font-size: 14px; font-weight: 500; }
+  .macro-grams { font-size: 13px; color: var(--muted); }
+  .bar-track { background: var(--dark3); border-radius: 4px; height: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+  .bar-protein { background: var(--green); }
+  .bar-carbs { background: var(--blue); }
+  .bar-fat { background: var(--amber); }
+
+  .food-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px; margin-bottom: 20px; }
+  .food-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+  .food-card-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .food-card-title span { font-size: 16px; }
+  .food-item { font-size: 12px; color: var(--soft); padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .food-item:last-child { border-bottom: none; }
+
+  .meal-timing { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin: 0 20px 20px; }
+  .meal-timing h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .meal-row { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); align-items: flex-start; }
+  .meal-row:last-child { border-bottom: none; }
+  .meal-time-badge {
+    background: var(--dark3); border-radius: 8px; padding: 6px 10px;
+    font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap; flex-shrink: 0;
+  }
+  .meal-info-title { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+  .meal-info-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+  /* RECOVERY PAGE */
+  .recovery-hero { padding: 40px 20px 28px; background: var(--dark2); }
+  .recovery-hero h1 { font-size: clamp(40px, 11vw, 64px); line-height: 0.92; }
+  .recovery-hero h1 em { font-style: normal; color: var(--green); }
+  .recovery-hero p { font-size: 14px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
+
+  .sleep-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; margin: 0 20px 16px; overflow: hidden; }
+  .sleep-card-header { background: rgba(184,245,58,0.06); border-bottom: 1px solid var(--border); padding: 16px 18px; display: flex; align-items: center; gap: 12px; }
+  .sleep-icon { font-size: 28px; }
+  .sleep-card-header h3 { font-size: 16px; font-weight: 600; }
+  .sleep-card-header p { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .sleep-chart { padding: 20px 18px; }
+  .sleep-hours { display: flex; align-items: flex-end; gap: 6px; height: 80px; margin-bottom: 8px; }
+  .sleep-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+  .sleep-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.6s ease; }
+  .sleep-bar.good { background: var(--green); }
+  .sleep-bar.ok { background: var(--amber); }
+  .sleep-bar.bad { background: var(--red); }
+  .sleep-bar-label { font-size: 10px; color: var(--muted); margin-top: 6px; }
+  .sleep-legend { display: flex; gap: 14px; margin-top: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  .rec-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin: 0 20px 12px; display: flex; gap: 14px; align-items: flex-start; }
+  .rec-icon { font-size: 24px; width: 44px; height: 44px; border-radius: 12px; background: var(--dark3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .rec-body h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .rec-body p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* TIPS PAGE */
+  .tips-hero { padding: 40px 20px 24px; background: var(--dark2); }
+  .tips-hero h1 { font-size: clamp(40px, 11vw, 64px); line-height: 0.92; }
+  .tips-hero h1 span { color: var(--green); }
+  .tips-hero p { font-size: 14px; color: var(--muted); margin-top: 10px; }
+
+  .tip-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px; margin: 0 20px 12px;
+    border-left: 3px solid var(--green);
+    position: relative;
+  }
+  .tip-num { font-family: 'Barlow Condensed', sans-serif; font-size: 44px; font-weight: 900; color: rgba(184,245,58,0.12); position: absolute; top: 10px; right: 14px; line-height: 1; }
+  .tip-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .tip-card p { font-size: 13px; color: var(--muted); line-height: 1.6; max-width: 90%; }
+
+  .myth-section { padding: 20px; }
+  .myth-section h2 { font-size: 20px; font-weight: 600; margin-bottom: 14px; }
+  .myth-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 12px; }
+  .myth-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .myth-label.red { color: var(--red); }
+  .myth-label.green { color: var(--green); }
+  .myth-text { font-size: 14px; line-height: 1.5; }
+  .myth-text.red { color: rgba(255,82,82,0.7); text-decoration: line-through; }
+  .myth-divider { display: flex; align-items: center; gap: 8px; margin: 10px 0; }
+  .myth-divider-line { flex: 1; height: 1px; background: var(--border); }
+  .myth-divider-icon { font-size: 16px; }
+
+  .supp-section { padding: 0 20px 20px; }
+  .supp-section h2 { font-size: 20px; font-weight: 600; margin-bottom: 14px; }
+  .supp-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .supp-row:last-child { border-bottom: none; }
+  .supp-badge { padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .badge-yes { background: rgba(184,245,58,0.15); color: var(--green); }
+  .badge-no { background: rgba(255,82,82,0.15); color: var(--red); }
+  .badge-maybe { background: rgba(255,184,48,0.15); color: var(--amber); }
+  .supp-name { font-size: 14px; font-weight: 500; flex: 1; }
+  .supp-why { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* SCROLL FADE */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .page.active .fade-up { animation: fadeUp 0.35s ease both; }
+  .fade-up:nth-child(1) { animation-delay: 0.05s; }
+  .fade-up:nth-child(2) { animation-delay: 0.10s; }
+  .fade-up:nth-child(3) { animation-delay: 0.15s; }
+  .fade-up:nth-child(4) { animation-delay: 0.20s; }
+  .fade-up:nth-child(5) { animation-delay: 0.25s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fade-up { animation: none !important; }
+  }
+
+  /* UTILITY */
+  .mt-16 { margin-top: 16px; }
+  .pb-20 { padding-bottom: 20px; }
+  .green { color: var(--green); }
+  .full-w { width: 100%; }
+  .cta-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--green); color: #0E0F0E; border: none; border-radius: 12px;
+    padding: 14px 20px; font-size: 15px; font-weight: 700; cursor: pointer;
+    font-family: 'Inter', sans-serif; width: 100%; transition: opacity 0.15s;
+  }
+  .cta-btn:active { opacity: 0.85; }
+  .secondary-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--dark3); color: var(--text); border: 1px solid var(--border); border-radius: 12px;
+    padding: 13px 20px; font-size: 15px; font-weight: 600; cursor: pointer;
+    font-family: 'Inter', sans-serif; width: 100%; transition: background 0.15s; margin-top: 10px;
+  }
+  .secondary-btn:active { background: var(--dark4); }
+</style>
+</head>
+<body>
+
+<!-- ===== PAGE: HOME ===== -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-eyebrow">Teen Fitness Guide</div>
+    <h1 class="display fade-up">BUILD<br><span>MUSCLE.</span><br>BURN FAT.</h1>
+    <p class="hero-sub fade-up">The complete recomposition plan for teen males — lose fat and gain a muscular physique at the same time.</p>
+    <div class="hero-stats fade-up">
+      <div class="hero-stat">
+        <div class="hero-stat-num">4</div>
+        <div class="hero-stat-label">Lift days/week</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">1g</div>
+        <div class="hero-stat-label">Protein/lb goal</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">9h</div>
+        <div class="hero-stat-label">Sleep target</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="week-progress fade-up">
+    <div class="week-head">
+      <h3>This week</h3>
+      <span>4/5 days ✓</span>
+    </div>
+    <div class="days-row">
+      <div class="day-dot"><div class="day-dot-circle done">✓</div><div class="day-dot-label">Mon</div></div>
+      <div class="day-dot"><div class="day-dot-circle done">✓</div><div class="day-dot-label">Tue</div></div>
+      <div class="day-dot"><div class="day-dot-circle rest">–</div><div class="day-dot-label">Wed</div></div>
+      <div class="day-dot"><div class="day-dot-circle done">✓</div><div class="day-dot-label">Thu</div></div>
+      <div class="day-dot"><div class="day-dot-circle today">F</div><div class="day-dot-label">Fri</div></div>
+      <div class="day-dot"><div class="day-dot-circle done">✓</div><div class="day-dot-label">Sat</div></div>
+      <div class="day-dot"><div class="day-dot-circle rest">–</div><div class="day-dot-label">Sun</div></div>
+    </div>
+  </div>
+
+  <div class="section fade-up">
+    <div class="section-head">
+      <h2>Jump to</h2>
+    </div>
+    <div class="quick-cards">
+      <div class="q-card q-card-green" onclick="goTo('workout')">
+        <div>
+          <div class="q-icon">🏋️</div>
+          <div class="q-title">Workout Schedule</div>
+          <div class="q-sub">4-day split</div>
+        </div>
+        <div class="q-arrow">→</div>
+      </div>
+      <div class="q-card q-card-dark" onclick="goTo('nutrition')">
+        <div>
+          <div class="q-icon">🥩</div>
+          <div class="q-title">Nutrition Plan</div>
+          <div class="q-sub">Macros & meals</div>
+        </div>
+        <div class="q-arrow">→</div>
+      </div>
+      <div class="q-card q-card-blue" onclick="goTo('recovery')">
+        <div>
+          <div class="q-icon">🌙</div>
+          <div class="q-title">Recovery</div>
+          <div class="q-sub">Sleep & rest</div>
+        </div>
+        <div class="q-arrow">→</div>
+      </div>
+      <div class="q-card q-card-amber" onclick="goTo('tips')">
+        <div>
+          <div class="q-icon">⚡</div>
+          <div class="q-title">Pro Tips</div>
+          <div class="q-sub">Myths busted</div>
+        </div>
+        <div class="q-arrow">→</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section fade-up" style="padding-top:4px;">
+    <div class="section-head"><h2>Why this works for teens</h2></div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;">
+      <p style="font-size:14px;color:var(--soft);line-height:1.7;margin-bottom:14px;">
+        Body recomposition — losing fat and building muscle <em style="color:var(--text)">simultaneously</em> — is harder for adults but genuinely achievable for teen males. Your body responds faster to training stimulus, and natural hormone levels (especially testosterone and growth hormone) are at their lifetime peak.
+      </p>
+      <p style="font-size:14px;color:var(--soft);line-height:1.7;">
+        The key: lift heavy, eat enough protein, sleep like it's your job, and stay consistent for months — not days.
+      </p>
+      <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="text-align:center;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:var(--green);">12–16</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">weeks to see real change</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:var(--green);">2–3×</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">faster gains than adults</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:0 20px 28px;">
+    <button class="cta-btn" onclick="goTo('workout')">Start with the workout plan →</button>
+  </div>
+</div>
+
+<!-- ===== PAGE: WORKOUT ===== -->
+<div class="page" id="page-workout">
+  <div class="page-header">
+    <div class="label fade-up">4-Day Split</div>
+    <h1 class="display fade-up">WEEKLY<br>SCHEDULE</h1>
+    <p class="fade-up">Upper/lower split — the most efficient structure for building muscle as a teen. Progressive overload every session.</p>
+  </div>
+
+  <div class="schedule pb-20">
+
+    <div class="day-card fade-up" id="dc-mon">
+      <div class="day-card-header" onclick="toggleDay('dc-mon')">
+        <div class="day-card-left">
+          <div class="day-badge badge-lift">MON</div>
+          <div>
+            <div class="day-card-title">Upper Body — Push/Pull</div>
+            <div class="day-card-sub">Chest · Back · Shoulders · Arms</div>
+          </div>
+        </div>
+        <div class="chevron">⌄</div>
+      </div>
+      <div class="day-card-body">
+        <div class="exercise-list">
+          <div class="ex-row"><span class="ex-name">Bench press (barbell or dumbbell)</span><span class="ex-sets">3 × 8–10</span></div>
+          <div class="ex-row"><span class="ex-name">Bent-over barbell row</span><span class="ex-sets">3 × 8–10</span></div>
+          <div class="ex-row"><span class="ex-name">Overhead press</span><span class="ex-sets">3 × 8–10</span></div>
+          <div class="ex-row"><span class="ex-name">Lat pulldown or pull-ups</span><span class="ex-sets">3 × 8–12</span></div>
+          <div class="ex-row"><span class="ex-name">Dumbbell bicep curls</span><span class="ex-sets">2 × 12</span></div>
+          <div class="ex-row"><span class="ex-name">Tricep pushdowns</span><span class="ex-sets">2 × 12</span></div>
+        </div>
+        <div class="tip-box">💡 <strong>Form tip:</strong> Control the lowering phase (2–3 seconds down). More time under tension = more muscle stimulus.</div>
+      </div>
+    </div>
+
+    <div class="day-card fade-up" id="dc-tue">
+      <div class="day-card-header" onclick="toggleDay('dc-tue')">
+        <div class="day-card-left">
+          <div class="day-badge badge-lift">TUE</div>
+          <div>
+            <div class="day-card-title">Lower Body — Squat Focus</div>
+            <div class="day-card-sub">Quads · Glutes · Hamstrings · Core</div>
+          </div>
+        </div>
+        <div class="chevron">⌄</div>
+      </div>
+      <div class="day-card-body">
+        <div class="exercise-list">
+          <div class="ex-row"><span class="ex-name">Barbell or goblet squat</span><span class="ex-sets">4 × 6–8</span></div>
+          <div class="ex-row"><span class="ex-name">Romanian deadlift</span><span class="ex-sets">3 × 8–10</span></div>
+          <div class="ex-row"><span class="ex-name">Leg press</span><span class="ex-sets">3 × 10–12</span></div>
+          <div class="ex-row"><span class="ex-name">Walking lunges</span><span class="ex-sets">3 × 10 each</span></div>
+          <div class="ex-row"><span class="ex-name">Standing calf raises</span><span class="ex-sets">3 × 15–20</span></div>
+          <div class="ex-row"><span class="ex-name">Plank</span><span class="ex-sets">3 × 45 sec</span></div>
+        </div>
+        <div class="tip-box">💡 <strong>Form tip:</strong> On squats, keep your chest up and knees tracking over your toes. Go to at least parallel.</div>
+      </div>
+    </div>
+
+    <div class="day-card fade-up" id="dc-wed">
+      <div class="day-card-header" onclick="toggleDay('dc-wed')">
+        <div class="day-card-left">
+          <div class="day-badge badge-rest">WED</div>
+          <div>
+            <div class="day-card-title">Active Recovery</div>
+            <div class="day-card-sub">Walk · Stretch · Mobility</div>
+          </div>
+        </div>
+        <div class="chevron">⌄</div>
+      </div>
+      <div class="day-card-body">
+        <div style="padding-top:14px;font-size:14px;color:var(--soft);line-height:1.6;">
+          20–30 minute easy walk or light cycling. Focus on stretching your hips, chest, and shoulders. Foam roll any sore spots. No intense exercise — let your muscles repair.
+        </div>
+      </div>
+    </div>
+
+    <div class="day-card fade-up" id="dc-thu">
+      <div class="day-card-header" onclick="toggleDay('dc-thu')">
+        <div class="day-card-left">
+          <div class="day-badge badge-lift">THU</div>
+          <div>
+            <div class="day-card-title">Upper Body — Hypertrophy</div>
+            <div class="day-card-sub">Chest · Back · Delts · Arms</div>
+          </div>
+        </div>
+        <div class="chevron">⌄</div>
+      </div>
+      <div class="day-card-body">
+        <div class="exercise-list">
+          <div class="ex-row"><span class="ex-name">Incline dumbbell press</span><span class="ex-sets">3 × 10</span></div>
+          <div class="ex-row"><span class="ex-name">Cable or machine row</span><span class="ex-sets">3 × 10</span></div>
+          <div class="ex-row"><span class="ex-name">Dumbbell lateral raises</span><span class="ex-sets">3 × 12–15</span></div>
+          <div class="ex-row"><span class="ex-name">Face pulls (cable)</span><span class="ex-sets">3 × 15</span></div>
+          <div class="ex-row"><span class="ex-name">Hammer curls</span><span class="ex-sets">2 × 12</span></div>
+          <div class="ex-row"><span class="ex-name">Skull crushers</span><span class="ex-sets">2 × 10</span></div>
+        </div>
+        <div class="tip-box">💡 <strong>Form tip:</strong> Face pulls are one of the best exercises for shoulder health. Don't skip them.</div>
+      </div>
+    </div>
+
+    <div class="day-card fade-up" id="dc-fri">
+      <div class="day-card-header" onclick="toggleDay('dc-fri')">
+        <div class="day-card-left">
+          <div class="day-badge badge-lift">FRI</div>
+          <div>
+            <div class="day-card-title">Lower Body — Deadlift Focus</div>
+            <div class="day-card-sub">Posterior chain · Core · Glutes</div>
+          </div>
+        </div>
+        <div class="chevron">⌄</div>
+      </div>
+      <div class="day-card-body">
+        <div class="exercise-list">
+          <div class="ex-row"><span class="ex-name">Conventional deadlift</span><span class="ex-sets">4 × 5</span></div>
+          <div class="ex-row"><span class="ex-name">Hack squat or leg press</span><span class="ex-sets">3 × 10</span></div>
+          <div class="ex-row"><span class="ex-name">Leg curl (machine)</span><span class="ex-sets">3 × 12</span></div>
+          <div class="ex-row"><span class="ex-name">Hip thrusts</span><span class="ex-sets">3 × 12</span></div>
+          <div class="ex-row"><span class="ex-name">Ab wheel or hanging leg raises</span><span class="ex-sets">3 × 10–15</span></div>
+          <div class="ex-row"><span class="ex-name">Russian twists</span><span class="ex-sets">3 × 20</span></div>
+        </div>
+        <div class="tip-box">💡 <strong>Form tip:</strong> Deadlift with a neutral spine — don't round your lower back. Film yourself from the side to check.</div>
+      </div>
+    </div>
+
+    <div class="day-card fade-up" id="dc-sat">
+      <div class="day-card-header" onclick="toggleDay('dc-sat')">
+        <div class="day-card-left">
+          <div class="day-badge badge-cardio">SAT</div>
+          <div>
+            <div class="day-card-title">Cardio Day</div>
+            <div class="day-card-sub">Moderate intensity · 25–35 min</div>
+          </div>
+        </div>
+        <div class="chevron">⌄</div>
+      </div>
+      <div class="day-card-body">
+        <div style="padding-top:14px;font-size:14px;color:var(--soft);line-height:1.6;">
+          Cycling, swimming, basketball, a brisk jog, or any sport you enjoy. Keep it to moderate intensity — you should be able to hold a conversation. Avoid doing 60+ minute steady-state runs; this can interfere with muscle building.
+        </div>
+      </div>
+    </div>
+
+    <div class="day-card fade-up" id="dc-sun">
+      <div class="day-card-header" onclick="toggleDay('dc-sun')">
+        <div class="day-card-left">
+          <div class="day-badge badge-rest">SUN</div>
+          <div>
+            <div class="day-card-title">Full Rest</div>
+            <div class="day-card-sub">Muscles grow on rest days</div>
+          </div>
+        </div>
+        <div class="chevron">⌄</div>
+      </div>
+      <div class="day-card-body">
+        <div style="padding-top:14px;font-size:14px;color:var(--soft);line-height:1.6;">
+          Complete rest. Muscle is built during recovery, not during the workout. Sleep in, eat well, and come back strong on Monday. Don't feel guilty about doing nothing.
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:8px;">
+      <div style="background:rgba(184,245,58,0.06);border:1px solid rgba(184,245,58,0.15);border-radius:14px;padding:18px;font-size:13px;color:var(--soft);line-height:1.6;">
+        <div style="color:var(--green);font-weight:600;margin-bottom:6px;">⚡ Progressive overload rule</div>
+        Each week, try to add a small amount of weight (2.5–5 lb) or do 1 extra rep on each exercise. This is the single most important principle for building muscle.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: NUTRITION ===== -->
+<div class="page" id="page-nutrition">
+  <div class="page-header">
+    <div class="label fade-up">Fuel the machine</div>
+    <h1 class="display fade-up">NUTRITION<br>PLAN</h1>
+    <p class="fade-up">Eat at a small calorie deficit with high protein. You'll lose fat while your muscles grow.</p>
+  </div>
+
+  <div style="height:20px;"></div>
+
+  <div class="macro-card fade-up">
+    <h3>Daily calorie target</h3>
+    <div class="calorie-display">
+      <div class="calorie-num">2,400</div>
+      <div class="calorie-unit">calories per day</div>
+      <div class="calorie-note">Adjust based on your height, weight, and how active you are outside the gym.<br>Most teen males need 2,000–2,800 cal. Aim ~200–300 below your maintenance.</div>
+    </div>
+    <div style="height:20px;"></div>
+    <div class="macro-bars">
+      <div class="macro-row">
+        <div class="macro-row-head">
+          <span class="macro-name">🟢 Protein</span>
+          <span class="macro-grams">~180g · 35% · #1 priority</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill bar-protein" style="width:35%"></div></div>
+      </div>
+      <div class="macro-row">
+        <div class="macro-row-head">
+          <span class="macro-name">🔵 Carbohydrates</span>
+          <span class="macro-grams">~270g · 45% · workout fuel</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill bar-carbs" style="width:45%"></div></div>
+      </div>
+      <div class="macro-row">
+        <div class="macro-row-head">
+          <span class="macro-name">🟡 Fat</span>
+          <span class="macro-grams">~80g · 20% · hormones</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill bar-fat" style="width:20%"></div></div>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);line-height:1.5;">
+      Protein is the most important macro for body recomposition. Aim for <strong style="color:var(--text)">0.7–1g per pound of bodyweight</strong> every single day — including rest days.
+    </div>
+  </div>
+
+  <div class="food-grid fade-up">
+    <div class="food-card">
+      <div class="food-card-title"><span>✅</span> Eat more of</div>
+      <div class="food-item">Chicken breast</div>
+      <div class="food-item">Eggs & egg whites</div>
+      <div class="food-item">Greek yogurt</div>
+      <div class="food-item">Salmon & tuna</div>
+      <div class="food-item">Rice & oats</div>
+      <div class="food-item">Sweet potato</div>
+      <div class="food-item">All vegetables</div>
+      <div class="food-item">Cottage cheese</div>
+      <div class="food-item">Milk & beans</div>
+    </div>
+    <div class="food-card">
+      <div class="food-card-title"><span>❌</span> Eat less of</div>
+      <div class="food-item">Fried fast food</div>
+      <div class="food-item">Sugary sodas</div>
+      <div class="food-item">Energy drinks</div>
+      <div class="food-item">Chips & candy</div>
+      <div class="food-item">Pastries & cake</div>
+      <div class="food-item">Large junk portions</div>
+      <div class="food-item">Late-night snacks</div>
+      <div class="food-item">Alcohol</div>
+    </div>
+  </div>
+
+  <div class="meal-timing fade-up">
+    <h3>Meal timing</h3>
+    <div class="meal-row">
+      <div class="meal-time-badge">7 AM</div>
+      <div>
+        <div class="meal-info-title">Breakfast</div>
+        <div class="meal-info-desc">Oats + eggs, or Greek yogurt + fruit. Get protein in early.</div>
+      </div>
+    </div>
+    <div class="meal-row">
+      <div class="meal-time-badge">12 PM</div>
+      <div>
+        <div class="meal-info-title">Lunch</div>
+        <div class="meal-info-desc">Rice + chicken + veggies. Classic, simple, effective.</div>
+      </div>
+    </div>
+    <div class="meal-row">
+      <div class="meal-time-badge">Pre-WO</div>
+      <div>
+        <div class="meal-info-title">Pre-workout snack</div>
+        <div class="meal-info-desc">1–2 hrs before training. Banana + protein shake, or toast + peanut butter.</div>
+      </div>
+    </div>
+    <div class="meal-row">
+      <div class="meal-time-badge">Post-WO</div>
+      <div>
+        <div class="meal-info-title">Post-workout meal</div>
+        <div class="meal-info-desc">Within 1–2 hours after training. Protein + carbs. Your muscles absorb nutrients best now.</div>
+      </div>
+    </div>
+    <div class="meal-row">
+      <div class="meal-time-badge">7 PM</div>
+      <div>
+        <div class="meal-info-title">Dinner</div>
+        <div class="meal-info-desc">Salmon or beef + potato + veggies. Round out your calories and protein.</div>
+      </div>
+    </div>
+    <div class="meal-row">
+      <div class="meal-time-badge">9 PM</div>
+      <div>
+        <div class="meal-info-title">Optional evening snack</div>
+        <div class="meal-info-desc">Cottage cheese or casein protein — digests slowly while you sleep.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:0 20px 28px;" class="fade-up">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;">
+      <div style="font-size:24px;margin-bottom:8px;">💧</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:4px;">Drink enough water</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.5;">Aim for 8–10 cups (2–2.5 litres) per day. Dehydration kills your strength, focus, and recovery. Even mild dehydration can drop your performance by 10–20%.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: RECOVERY ===== -->
+<div class="page" id="page-recovery">
+  <div class="recovery-hero">
+    <div class="label fade-up">The overlooked half</div>
+    <h1 class="display fade-up">SLEEP.<br><em>GROW.</em><br>REPEAT.</h1>
+    <p class="fade-up">Muscle is built while you rest, not while you lift. Missing sleep is like doing half a workout.</p>
+  </div>
+
+  <div style="height:20px;"></div>
+
+  <div class="sleep-card fade-up">
+    <div class="sleep-card-header">
+      <div class="sleep-icon">🌙</div>
+      <div>
+        <h3>Sleep 8–10 hours every night</h3>
+        <p>The single most powerful tool you have as a teen athlete</p>
+      </div>
+    </div>
+    <div class="sleep-chart">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Sleep vs. performance impact</div>
+      <div class="sleep-hours">
+        <div class="sleep-bar-wrap">
+          <div class="sleep-bar bad" style="height:25%"></div>
+          <div class="sleep-bar-label">5h</div>
+        </div>
+        <div class="sleep-bar-wrap">
+          <div class="sleep-bar bad" style="height:40%"></div>
+          <div class="sleep-bar-label">6h</div>
+        </div>
+        <div class="sleep-bar-wrap">
+          <div class="sleep-bar ok" style="height:60%"></div>
+          <div class="sleep-bar-label">7h</div>
+        </div>
+        <div class="sleep-bar-wrap">
+          <div class="sleep-bar good" style="height:82%"></div>
+          <div class="sleep-bar-label">8h</div>
+        </div>
+        <div class="sleep-bar-wrap">
+          <div class="sleep-bar good" style="height:95%"></div>
+          <div class="sleep-bar-label">9h</div>
+        </div>
+        <div class="sleep-bar-wrap">
+          <div class="sleep-bar good" style="height:100%"></div>
+          <div class="sleep-bar-label">10h</div>
+        </div>
+      </div>
+      <div class="sleep-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green);"></div>Optimal</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--amber);"></div>Adequate</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red);"></div>Harmful</div>
+      </div>
+      <div style="margin-top:14px;font-size:13px;color:var(--muted);line-height:1.5;">
+        Growth hormone is released during deep sleep stages — this is literally how you build muscle. Cutting sleep cuts your gains.
+      </div>
+    </div>
+  </div>
+
+  <div class="rec-card fade-up">
+    <div class="rec-icon">📱</div>
+    <div class="rec-body">
+      <h3>Phone off by 10pm</h3>
+      <p>Blue light suppresses melatonin and delays sleep onset. Set an alarm, put the phone in another room. It makes a real, measurable difference.</p>
+    </div>
+  </div>
+
+  <div class="rec-card fade-up">
+    <div class="rec-icon">🧘</div>
+    <div class="rec-body">
+      <h3>Stretch after every workout</h3>
+      <p>10 minutes of static stretching post-session. Focus on hips, hamstrings, chest, and shoulders. Better mobility means better lifting form and fewer injuries.</p>
+    </div>
+  </div>
+
+  <div class="rec-card fade-up">
+    <div class="rec-icon">🩺</div>
+    <div class="rec-body">
+      <h3>Know the difference: soreness vs. pain</h3>
+      <p>Muscle soreness (DOMS) is normal and fades in 24–72 hours. Sharp joint pain is not — stop the exercise and rest. Pushing through actual pain leads to injuries that set you back weeks.</p>
+    </div>
+  </div>
+
+  <div class="rec-card fade-up">
+    <div class="rec-icon">🍽️</div>
+    <div class="rec-body">
+      <h3>Eat on rest days too</h3>
+      <p>Your muscles are actively repairing on rest days. Don't slash calories or skip protein just because you're not training. Eat as close to your normal intake as possible.</p>
+    </div>
+  </div>
+
+  <div class="rec-card fade-up">
+    <div class="rec-icon">🧊</div>
+    <div class="rec-body">
+      <h3>Managing stress matters</h3>
+      <p>Chronic stress raises cortisol, which breaks down muscle and promotes fat storage. School stress is real — find ways to decompress: music, walks, friends, whatever works for you.</p>
+    </div>
+  </div>
+
+  <div style="padding:0 20px 28px;" class="fade-up">
+    <div style="background:rgba(184,245,58,0.06);border:1px solid rgba(184,245,58,0.2);border-radius:14px;padding:18px;">
+      <div style="font-size:14px;font-weight:600;color:var(--green);margin-bottom:8px;">Recovery checklist</div>
+      <div id="checklist" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: TIPS ===== -->
+<div class="page" id="page-tips">
+  <div class="tips-hero">
+    <div class="label fade-up">What actually matters</div>
+    <h1 class="display fade-up">PRO<br><span>TIPS &</span><br>MYTHS</h1>
+    <p class="fade-up">The things that separate teens who transform vs. teens who quit after 3 weeks.</p>
+  </div>
+
+  <div style="padding:20px 20px 0;">
+    <div class="label" style="margin-bottom:14px;">6 rules to follow</div>
+  </div>
+
+  <div class="tip-card fade-up">
+    <div class="tip-num">01</div>
+    <h3>Progressive overload is the law</h3>
+    <p>Add a little more weight or one more rep every week. Your muscles adapt fast — constant new challenge is the only thing that keeps them growing. Track it or lose it.</p>
+  </div>
+
+  <div class="tip-card fade-up">
+    <div class="tip-num">02</div>
+    <h3>Form beats weight, always</h3>
+    <p>Lifting too heavy with bad technique causes injuries and actually builds less muscle. Learn correct form first. Ego lifting gets you nowhere but the physio's office.</p>
+  </div>
+
+  <div class="tip-card fade-up">
+    <div class="tip-num">03</div>
+    <h3>Track your lifts in a notebook</h3>
+    <p>Write down what you lift each session. Seeing progression is motivating, and it tells you exactly when you're stalling so you can adjust.</p>
+  </div>
+
+  <div class="tip-card fade-up">
+    <div class="tip-num">04</div>
+    <h3>Don't obsess over the scale</h3>
+    <p>You may gain muscle while losing fat, so the scale might barely move even as your body transforms. Judge progress by mirror, measurements, and strength numbers — not weight.</p>
+  </div>
+
+  <div class="tip-card fade-up">
+    <div class="tip-num">05</div>
+    <h3>Consistency beats intensity</h3>
+    <p>Showing up 4 days a week for 6 months will transform you. Going all-out for 2 weeks then quitting won't. Sustainable effort over time is the only strategy that works.</p>
+  </div>
+
+  <div class="tip-card fade-up">
+    <div class="tip-num">06</div>
+    <h3>Patience is the hardest skill</h3>
+    <p>Real, visible changes take 8–16 weeks of consistent work. Progress photos monthly, not daily. The teens who succeed are the ones who trust the process and don't quit.</p>
+  </div>
+
+  <div class="myth-section fade-up">
+    <h2>Common myths — busted</h2>
+
+    <div class="myth-card">
+      <div class="myth-label red">❌ Myth</div>
+      <div class="myth-text red">You need to do tons of cardio to lose fat</div>
+      <div class="myth-divider"><div class="myth-divider-line"></div><div class="myth-divider-icon">↓</div><div class="myth-divider-line"></div></div>
+      <div class="myth-label green">✅ Reality</div>
+      <div class="myth-text" style="font-size:14px;color:var(--soft);line-height:1.5;">Lifting weights burns fat effectively, and muscle you build increases your resting metabolism. A calorie deficit from diet is far more impactful than hours on a treadmill.</div>
+    </div>
+
+    <div class="myth-card">
+      <div class="myth-label red">❌ Myth</div>
+      <div class="myth-text red">Lifting weights will stunt your growth as a teen</div>
+      <div class="myth-divider"><div class="myth-divider-line"></div><div class="myth-divider-icon">↓</div><div class="myth-divider-line"></div></div>
+      <div class="myth-label green">✅ Reality</div>
+      <div class="myth-text" style="font-size:14px;color:var(--soft);line-height:1.5;">There is no scientific evidence that resistance training stunts growth. With proper form and appropriate loads, strength training is safe and beneficial for teens. Major health organizations support it.</div>
+    </div>
+
+    <div class="myth-card">
+      <div class="myth-label red">❌ Myth</div>
+      <div class="myth-text red">You need lots of supplements to build muscle</div>
+      <div class="myth-divider"><div class="myth-divider-line"></div><div class="myth-divider-icon">↓</div><div class="myth-divider-line"></div></div>
+      <div class="myth-label green">✅ Reality</div>
+      <div class="myth-text" style="font-size:14px;color:var(--soft);line-height:1.5;">Food, sleep, and training are what build muscle. A basic whey protein powder helps if you struggle to hit protein from food. Everything else is expensive marketing.</div>
+    </div>
+
+    <div class="myth-card">
+      <div class="myth-label red">❌ Myth</div>
+      <div class="myth-text red">You need to train every day or you'll lose gains</div>
+      <div class="myth-divider"><div class="myth-divider-line"></div><div class="myth-divider-icon">↓</div><div class="myth-divider-line"></div></div>
+      <div class="myth-label green">✅ Reality</div>
+      <div class="myth-text" style="font-size:14px;color:var(--soft);line-height:1.5;">Overtraining is real. Muscles grow on rest days. 4 days of quality training beats 7 days of mediocre, exhausted sessions every time.</div>
+    </div>
+  </div>
+
+  <div class="supp-section fade-up">
+    <h2>Supplement guide</h2>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;">
+      <div class="supp-row">
+        <div>
+          <div class="supp-name">Whey protein powder</div>
+          <div class="supp-why">Helps hit daily protein if diet falls short</div>
+        </div>
+        <div class="supp-badge badge-yes">Worth it</div>
+      </div>
+      <div class="supp-row">
+        <div>
+          <div class="supp-name">Creatine monohydrate</div>
+          <div class="supp-why">Most researched sports supplement; boosts strength safely</div>
+        </div>
+        <div class="supp-badge badge-maybe">Optional</div>
+      </div>
+      <div class="supp-row">
+        <div>
+          <div class="supp-name">Pre-workout / stimulants</div>
+          <div class="supp-why">High caffeine; not recommended for teens</div>
+        </div>
+        <div class="supp-badge badge-no">Avoid</div>
+      </div>
+      <div class="supp-row">
+        <div>
+          <div class="supp-name">Fat burners</div>
+          <div class="supp-why">No proven benefit; often contain harmful stimulants</div>
+        </div>
+        <div class="supp-badge badge-no">Avoid</div>
+      </div>
+      <div class="supp-row">
+        <div>
+          <div class="supp-name">Steroids / SARMs / PEDs</div>
+          <div class="supp-why">Dangerous for teen hormone development. Never.</div>
+        </div>
+        <div class="supp-badge badge-no">Never</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:0 20px 28px;" class="fade-up">
+    <div style="background:var(--dark2);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--green);letter-spacing:-0.01em;margin-bottom:8px;">"FORM TODAY,<br>STRENGTH TOMORROW."</div>
+      <div style="font-size:13px;color:var(--muted);">The teen who masters fundamentals outperforms the one chasing shortcuts — every time.</div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-indicator" id="nav-indicator"></div>
+  <button class="nav-btn active" id="nav-home" onclick="goTo('home')" aria-label="Home">
+    <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+    Home
+  </button>
+  <button class="nav-btn" id="nav-workout" onclick="goTo('workout')" aria-label="Workout">
+    <svg viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 17.5h11M4 12h16M2 9.5h2M20 9.5h2M2 14.5h2M20 14.5h2"/></svg>
+    Workout
+  </button>
+  <button class="nav-btn" id="nav-nutrition" onclick="goTo('nutrition')" aria-label="Nutrition">
+    <svg viewBox="0 0 24 24"><path d="M12 2C8 2 4 6 4 10c0 6 8 12 8 12s8-6 8-12c0-4-4-8-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+    Nutrition
+  </button>
+  <button class="nav-btn" id="nav-recovery" onclick="goTo('recovery')" aria-label="Recovery">
+    <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9M12 7v5l3 3"/><path d="M16.24 7.76A6 6 0 0121 12"/></svg>
+    Recovery
+  </button>
+  <button class="nav-btn" id="nav-tips" onclick="goTo('tips')" aria-label="Tips">
+    <svg viewBox="0 0 24 24"><path d="M9.663 17h4.674M12 3a6 6 0 016 6c0 1.868-.854 3.536-2.19 4.662A4 4 0 0014 17H10a4 4 0 00-1.81-3.338A6 6 0 016 9a6 6 0 016-6z"/><path d="M12 21v-2"/></svg>
+    Tips
+  </button>
+</nav>
+
+<script>
+  const pages = ['home','workout','nutrition','recovery','tips'];
+
+  const checklistItems = [
+    { id:'c1', text:'Got 8+ hours of sleep last night' },
+    { id:'c2', text:'Hit my protein goal today' },
+    { id:'c3', text:'Drank 8+ cups of water' },
+    { id:'c4', text:'Stretched after my workout' },
+    { id:'c5', text:'No phone 30 min before bed' },
+  ];
+
+  const checks = {};
+  const cList = document.getElementById('checklist');
+  checklistItems.forEach(item => {
+    checks[item.id] = false;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;cursor:pointer;';
+    row.innerHTML = `
+      <div id="cb-${item.id}" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;"></div>
+      <span style="font-size:13px;color:var(--soft);">${item.text}</span>`;
+    row.addEventListener('click', () => {
+      checks[item.id] = !checks[item.id];
+      const cb = document.getElementById('cb-' + item.id);
+      cb.style.background = checks[item.id] ? 'var(--green)' : '';
+      cb.style.borderColor = checks[item.id] ? 'var(--green)' : 'var(--border)';
+      cb.innerHTML = checks[item.id] ? '<span style="color:#0E0F0E;font-size:14px;font-weight:700;">✓</span>' : '';
+    });
+    cList.appendChild(row);
+  });
+
+  function goTo(name) {
+    pages.forEach(p => {
+      document.getElementById('page-' + p).classList.remove('active');
+      const nb = document.getElementById('nav-' + p);
+      if(nb) nb.classList.remove('active');
+    });
+    document.getElementById('page-' + name).classList.add('active');
+    const nb = document.getElementById('nav-' + name);
+    if(nb) nb.classList.add('active');
+    window.scrollTo(0,0);
+    updateIndicator(name);
+  }
+
+  function updateIndicator(name) {
+    const btn = document.getElementById('nav-' + name);
+    const nav = document.querySelector('.bottom-nav');
+    const ind = document.getElementById('nav-indicator');
+    if(!btn) return;
+    const btnRect = btn.getBoundingClientRect();
+    const navRect = nav.getBoundingClientRect();
+    const left = btnRect.left - navRect.left;
+    const w = btnRect.width;
+    ind.style.left = left + 'px';
+    ind.style.width = w + 'px';
+    ind.style.transform = 'scaleX(1)';
+  }
+
+  function toggleDay(id) {
+    const card = document.getElementById(id);
+    card.classList.toggle('open');
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(() => updateIndicator('home'), 100);
+  });
+</script>
+</body>
+</html>
